@@ -3,7 +3,7 @@ using Movies.Domain.Models;
 
 namespace Movies.Domain.Data
 {
-    internal sealed class MoviesDbContext : DbContext
+    public class MoviesDbContext : DbContext
     {
         private readonly string _dbConnString;
 
@@ -18,6 +18,5 @@ namespace Movies.Domain.Data
         }
 
         public DbSet<Movie> Movies { get; set; }
-
     }
 }

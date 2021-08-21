@@ -11,7 +11,7 @@ services:
       ACCEPT_EULA: Y  
       SA_PASSWORD: "Az1234567"  
     volumes:  
-      - ./data/mssql:/var/opt/mssql3  
+      - ~/data/mssql:/var/opt/mssql3  
     ports:  
       - '1433:1433'  
     expose:  
