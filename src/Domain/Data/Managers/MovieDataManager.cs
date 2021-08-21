@@ -1,21 +1,16 @@
-﻿using System;
+﻿using Movies.Domain.Enums;
+using Movies.Domain.Models;
+using Movies.Domain.Parsers;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
-using Movies.Domain.Data.Managers.CommandFactories;
-using Movies.Domain.Enums;
-using Movies.Domain.Exceptions;
-using Movies.Domain.Extensions;
-using Movies.Domain.Models;
-using Movies.Domain.Parsers;
 
 namespace Movies.Domain.Data.Managers
 {
     internal sealed class MovieDataManager
     {
-        private readonly SqlClientFactory _sqlClientFactory = SqlClientFactory.Instance;
         private readonly string _dbConnectionString;
 
         public MovieDataManager(string dbConnectionString)
@@ -23,131 +18,45 @@ namespace Movies.Domain.Data.Managers
             _dbConnectionString = dbConnectionString;
         }
 
-        private DbConnection CreateDbConnection()
-        {
-            var dbConnection = _sqlClientFactory.CreateConnection();
-            dbConnection.ConnectionString = _dbConnectionString;
-            return dbConnection;
-        }
-
         public async Task<int> CreateMovie(Movie movie)
         {
-            var dbConnection = CreateDbConnection();
-            DbCommand dbCommand = null;
-            DbTransaction dbTransaction = null;
-            try
+            using (var moviesDbContext = new MoviesDbContext(_dbConnectionString))
             {
-                await dbConnection.OpenAsync().ConfigureAwait(false);
-                dbTransaction = dbConnection.BeginTransaction(IsolationLevel.Serializable);
-                dbCommand = CommandFactoryMovies.CreateCommandForCreateMovie(dbConnection, dbTransaction, movie);
-                await dbCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
-                dbTransaction.Commit();
-                return (int)dbCommand.Parameters[0].Value;
-            }
-            catch (DbException e)
-            {
-                dbTransaction.RollbackIfNotNull();
-
-                if (e.Message.Contains("duplicate key row in object 'dbo.Movie'", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new DuplicateMovieException($"A Movie with the Title: {movie.Title} already exists. Please use a different title", e);
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            finally
-            {
-                dbCommand.DisposeIfNotNull();
-                dbTransaction.DisposeIfNotNull();
-                dbConnection.Dispose();
+                moviesDbContext.Movies.Add(movie);
+                return await moviesDbContext.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
         public async Task CreateMovies(IEnumerable<Movie> movies)
         {
-            var dbConnection = CreateDbConnection();
-            DbTransaction dbTransaction = null;
-            DbCommand dbCommand = null;
-            try
+            using (var moviesDbContext = new MoviesDbContext(_dbConnectionString))
             {
-                await dbConnection.OpenAsync().ConfigureAwait(false);
-                dbTransaction = dbConnection.BeginTransaction();
-                dbCommand = CommandFactoryMovies.CreateCommandForCreateMoviesTvpDistinctInsertInto(dbConnection, dbTransaction, movies);
-                await dbCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
-                dbTransaction.Commit();
-            }
-            catch (DbException)
-            {
-                dbTransaction.RollbackIfNotNull();
-                throw;
-            }
-            finally
-            {
-                dbCommand.DisposeIfNotNull();
-                dbTransaction.DisposeIfNotNull();
-                dbConnection.DisposeIfNotNull();
+                moviesDbContext.Movies.AddRange(movies);
+                await moviesDbContext.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
         public async Task<Movie> GetMovieById(int id)
         {
-            var dbConnection = CreateDbConnection();
-            DbCommand dbCommand = null;
-            DbDataReader dbDataReader = null;
-            try
+            using (var moviesDbContext = new MoviesDbContext(_dbConnectionString))
             {
-                await dbConnection.OpenAsync().ConfigureAwait(false);
-                dbCommand = CommandFactoryMovies.CreateCommandForGetMovieById(dbConnection, id);
-                dbDataReader = await dbCommand.ExecuteReaderAsync().ConfigureAwait(false);
-                return await MapToMovie(dbDataReader).ConfigureAwait(false);
-            }
-            finally
-            {
-                dbDataReader.DisposeIfNotNull();
-                dbCommand.DisposeIfNotNull();
-                dbConnection.Dispose();
+                return await moviesDbContext.FindAsync<Movie>(id);
             }
         }
 
         public async Task<IEnumerable<Movie>> GetMovieByGenre(Genre genre)
         {
-            var dbConnection = CreateDbConnection();
-            DbCommand dbCommand = null;
-            DbDataReader dbDataReader = null;
-            try
+            using (var moviesDbContext = new MoviesDbContext(_dbConnectionString))
             {
-                await dbConnection.OpenAsync().ConfigureAwait(false);
-                dbCommand = CommandFactoryMovies.CreateCommandForGetMoviesByGenre(dbConnection, genre);
-                dbDataReader = await dbCommand.ExecuteReaderAsync().ConfigureAwait(false);
-                return await MapToMovies(dbDataReader).ConfigureAwait(false);
-            }
-            finally
-            {
-                dbDataReader.DisposeIfNotNull();
-                dbCommand.DisposeIfNotNull();
-                dbConnection.Dispose();
+                return await Task.FromResult(moviesDbContext.Movies.Where(m => m.Genre == genre).ToList()).ConfigureAwait(false);
             }
         }
 
         public async Task<IEnumerable<Movie>> GetAllMovies()
         {
-            var dbConnection = CreateDbConnection();
-            DbCommand dbCommand = null;
-            DbDataReader dbDataReader = null;
-            try
+            using (var moviesDbContext = new MoviesDbContext(_dbConnectionString))
             {
-                await dbConnection.OpenAsync().ConfigureAwait(false);
-                dbCommand = CommandFactoryMovies.CreateCommandForGetAllMovies(dbConnection);
-                dbDataReader = await dbCommand.ExecuteReaderAsync().ConfigureAwait(false);
-                return await MapToMovies(dbDataReader).ConfigureAwait(false);
-            }
-            finally
-            {
-                dbDataReader.DisposeIfNotNull();
-                dbCommand.DisposeIfNotNull();
-                dbConnection.Dispose();
+                return await Task.FromResult(moviesDbContext.Movies.ToList()).ConfigureAwait(false);
             }
         }
 
