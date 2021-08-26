@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Test.Class.ForTestClasses
+namespace Test.Controller
 {
     internal sealed class MovieControllerForTest : MoviesController
     {

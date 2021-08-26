@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using Test.Shared;
 using Test.Shared.Helpers;
 
-namespace AcceptanceTests
+namespace Test.Acceptance.Domain.ServiceLocators
 {
     [TestClass]
     public class DomainFacadeTests

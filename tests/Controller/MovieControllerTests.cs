@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Test.Class.ForTestClasses;
 using Movies.Domain.Enums;
 using Movies.Domain.Exceptions;
 using Movies.Domain.Models;
@@ -9,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Movies.Service.ResourceModels;
 using Test.Shared;
 
-namespace ControllerTests
+namespace Test.Controller
 {
     [TestClass]
     public class MovieControllerTests

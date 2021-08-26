@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using Test.Shared;
 
-namespace ClassTests
+namespace Test.Class
 {
     [TestClass]
     public class ConfigurationProviderTests
