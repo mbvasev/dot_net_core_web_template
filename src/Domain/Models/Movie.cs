@@ -4,7 +4,7 @@ namespace Movies.Domain.Models
 {
     public sealed class Movie
     {
-        private int _id;
+        public int Id { get; private set; }
         public string Title { get; }
         public string ImageUrl { get; }
         public Genre Genre { get; }

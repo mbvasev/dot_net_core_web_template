@@ -28,11 +28,11 @@ namespace Movies.Domain.Data
             modelBuilder.Entity<Movie>(
                 b =>
                 {
-                    b.HasKey("_id");
                     b.Property(e => e.Title);
                     b.Property(e => e.ImageUrl);
                     b.Property(e => e.Genre);
                     b.Property(e => e.Year);
+                    b.HasIndex(e => e.Title).IsUnique();
                 });
         }
 

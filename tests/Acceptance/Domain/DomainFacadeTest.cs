@@ -275,7 +275,7 @@ namespace AcceptanceTests
             {
                 // Act
                 await domainFacade.CreateMovie(expectedMovie);
-                await domainFacade.CreateMovie(expectedMovie);
+                await domainFacade.CreateMovie(new Movie(title: expectedMovie.Title, imageUrl: expectedMovie.ImageUrl, genre: expectedMovie.Genre, year: expectedMovie.Year));
                 Assert.Fail("We were expecting a DuplicateMovieException exception to be thrown, but no exception was thrown");
 
             }
@@ -283,6 +283,11 @@ namespace AcceptanceTests
             {
                 // Assert
                 StringAssert.Contains(e.Message, $"Title: {expectedMovie.Title} already exists");
+            }
+
+            catch (Exception e)
+            {
+                Assert.Fail($"We were expecting a {typeof(DuplicateMovieException)} exception to be thrown, but other exception {e.GetType()} was thrown");
             }
             finally
             {
