@@ -287,7 +287,7 @@ namespace AcceptanceTests
 
             catch (Exception e)
             {
-                Assert.Fail($"We were expecting a {typeof(DuplicateMovieException)} exception to be thrown, but other exception {e.GetType()} was thrown");
+                Assert.Fail($"We were expecting a {typeof(DuplicateMovieException)} exception to be thrown, but exception {e.GetType()} was thrown");
             }
             finally
             {

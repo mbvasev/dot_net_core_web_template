@@ -5,6 +5,8 @@ using Movies.Domain.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.Common;
 using System.Threading.Tasks;
+using System;
+using Movies.Domain.Exceptions;
 
 namespace Test.Acceptance.Domain.Data.Managers
 {
@@ -38,9 +40,14 @@ namespace Test.Acceptance.Domain.Data.Managers
                 await movieDataManager.CreateMovie(movie);
                 Assert.Fail("We were expecting a DbException to be thrown, but no exception was thrown");
             }
-            catch (DbException e)
+            catch (InvalidMovieException )
             {
-                StringAssert.Contains(e.Message, "'CreateMovie' expects parameter '@Title', which was not supplied");
+                return;
+            }
+            catch (Exception e)
+            {
+                Assert.Fail($"We were expecting a {typeof(DbException)} exception be thrown, but exception {e.GetType()} was thrown");
+
             }
         }
     }

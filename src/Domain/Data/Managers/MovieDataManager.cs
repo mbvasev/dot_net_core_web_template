@@ -1,6 +1,9 @@
-﻿using Movies.Domain.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using Movies.Domain.Enums;
+using Movies.Domain.Exceptions;
 using Movies.Domain.Models;
 using Movies.Domain.Parsers;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -22,8 +25,28 @@ namespace Movies.Domain.Data.Managers
         {
             using (var moviesDbContext = new MoviesDbContext(_dbConnectionString))
             {
-                moviesDbContext.Movies.Add(movie);
-                return await moviesDbContext.SaveChangesAsync().ConfigureAwait(false);
+                try
+                {
+                    moviesDbContext.Movies.Add(movie);
+                    return await moviesDbContext.SaveChangesAsync().ConfigureAwait(false);
+                }
+                catch (DbUpdateException e)
+                {
+                    if (e.InnerException != null)
+                    {
+                        if (e.InnerException.Message.Contains("duplicate key row in object 'dbo.Movies'", StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new DuplicateMovieException($"A Movie with the Title: {movie.Title} already exists. Please use a different title", e);
+                        }
+                        if( e.InnerException.Message.Contains("Cannot insert", StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new InvalidMovieException(e.InnerException.Message);
+                        }
+                        throw;
+
+                    }
+                    throw;
+                }
             }
         }
 
