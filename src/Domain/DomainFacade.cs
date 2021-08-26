@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Movies.Domain.Enums;
-using Movies.Domain.Managers;
 using Movies.Domain.Models;
 using Movies.Domain.ServiceLocators;
 
@@ -19,9 +18,9 @@ namespace Movies.Domain
         private bool _disposed;
         private readonly ServiceLocatorBase _serviceLocator;
 
-        private MovieManager _movieManager;
+        private Managers.Movie.Manager _movieManager;
 
-        private MovieManager MovieManager { get { return _movieManager ??= new MovieManager(_serviceLocator); } }
+        private Managers.Movie.Manager MovieManager { get { return _movieManager ??= new Managers.Movie.Manager(_serviceLocator); } }
 
         public DomainFacade()
           : this(new ServiceLocator())

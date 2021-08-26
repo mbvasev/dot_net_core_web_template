@@ -6,6 +6,7 @@ namespace Movies.Domain.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            #pragma warning disable CA1062
             migrationBuilder.CreateTable(
                 name: "Movies",
                 columns: table => new
@@ -32,6 +33,7 @@ namespace Movies.Domain.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            #pragma warning disable CA1062
             migrationBuilder.DropTable(name: "Movies");
         }
     }

@@ -25,6 +25,7 @@ namespace Movies.Domain.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #pragma warning disable CA1062
             modelBuilder.Entity<Movie>(
                 b =>
                 {

@@ -1,5 +1,4 @@
 ﻿using Movies.Domain.ConfigurationProviders;
-using Movies.Domain.Data;
 using Movies.Domain.Data.Managers;
 using Movies.Domain.Enums;
 using Movies.Domain.Exceptions;
@@ -7,16 +6,16 @@ using Movies.Domain.Models;
 using Movies.Domain.Parsers;
 using Movies.Domain.ServiceLocators;
 using Movies.Domain.Services.ImdbService;
-using Movies.Domain.Validators;
+using Movies.Domain.Validators.Movie;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Movies.Domain.Managers
+namespace Movies.Domain.Managers.Movie
 {
-    internal sealed class MovieManager : IDisposable
+    internal sealed class Manager : IDisposable
     {
         private bool _disposed;
         private readonly ServiceLocatorBase _serviceLocator;
@@ -36,31 +35,31 @@ namespace Movies.Domain.Managers
         private DataFacade _dataFacade;
         private DataFacade DataFacade { get { return _dataFacade ?? (_dataFacade = new DataFacade(ConfigurationProvider.GetDbConnectionString())); } }
 
-        public MovieManager(ServiceLocatorBase serviceLocator)
+        public Manager(ServiceLocatorBase serviceLocator)
         {
             _serviceLocator = serviceLocator;
         }
 
-        public Task<int> CreateMovie(Movie movie)
+        public Task<int> CreateMovie(Models.Movie movie)
         {
-            ValidatorMovie.EnsureMovieIsValid(movie);
+            Validator.EnsureMovieIsValid(movie);
             return DataFacade.CreateMovie(movie);
         }
 
-        public async Task<Movie> GetMovieById(int id)
+        public async Task<Models.Movie> GetMovieById(int id)
         {
             var movie = await DataFacade.GetMovieById(id).ConfigureAwait(false);
             return movie ?? throw new MovieWithSpecifiedIdNotFoundException($"A Movie with Id: {id} was Not Found");
         }
 
-        public Task<IEnumerable<Movie>> GetAllMovies()
+        public Task<IEnumerable<Models.Movie>> GetAllMovies()
         {
             var moviesTask = ImdbServiceGateway.GetAllMovies();
             var moviesFromDbTask = DataFacade.GetAllMovies();
             return GetMoviesFromCombinedTasks(moviesTask, moviesFromDbTask);
         }
 
-        private static async Task<IEnumerable<Movie>> GetMoviesFromCombinedTasks(Task<IEnumerable<Movie>> moviesTask, Task<IEnumerable<Movie>> moviesFromDbTask)
+        private static async Task<IEnumerable<Models.Movie>> GetMoviesFromCombinedTasks(Task<IEnumerable<Models.Movie>> moviesTask, Task<IEnumerable<Models.Movie>> moviesFromDbTask)
         {
             await Task.WhenAll(moviesTask, moviesFromDbTask).ConfigureAwait(false);
 
@@ -72,7 +71,7 @@ namespace Movies.Domain.Managers
             return moviesList;
         }
 
-        public async Task<IEnumerable<Movie>> GetMoviesByGenre(Genre genre)
+        public async Task<IEnumerable<Models.Movie>> GetMoviesByGenre(Genre genre)
         {
             GenreParser.Validate(genre);
             var moviesFromImdbTask = ImdbServiceGateway.GetAllMovies();

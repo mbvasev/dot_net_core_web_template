@@ -1,23 +1,22 @@
 ﻿using Movies.Domain.Enums;
 using Movies.Domain.Exceptions;
-using Movies.Domain.Models;
 using Movies.Domain.Parsers;
 using System;
 
-namespace Movies.Domain.Validators
+namespace Movies.Domain.Validators.Movie
 {
     internal enum StringState { Null, Empty, WhiteSpaces, Valid }
 
-    internal static class ValidatorMovie
+    internal static class Validator
     {
-        public static void EnsureMovieIsValid(Movie movie)
+        public static void EnsureMovieIsValid(Movies.Domain.Models.Movie movie)
         {
             EnsureMovieIsNotNull(movie);
             var errorMessages = ValidateProperties(movie);
             EnsureNoErrors(errorMessages);
         }
 
-        private static string ValidateProperties(Movie movie)
+        private static string ValidateProperties(Movies.Domain.Models.Movie movie)
         {
             var genreErrorMessage = ValidateGenre(movie.Genre);
             var titleErrorMessage = ValidateProperty("Title", movie.Title);
@@ -36,7 +35,7 @@ namespace Movies.Domain.Validators
             }
         }
 
-        private static void EnsureMovieIsNotNull(Movie movie)
+        private static void EnsureMovieIsNotNull(Movies.Domain.Models.Movie movie)
         {
             if (movie == null)
             {
