@@ -1,4 +1,5 @@
-﻿using Movies.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using Movies.Domain.Enums;
 
 namespace Movies.Domain.Models
 {
@@ -9,6 +10,9 @@ namespace Movies.Domain.Models
         public string ImageUrl { get; }
         public Genre Genre { get; }
         public int Year { get; }
+
+        [Timestamp]
+        public byte[] TimeStamp { get; private set;}
 
         public Movie(string title, string imageUrl, Genre genre, int year)
         {

@@ -34,6 +34,7 @@ namespace Movies.Domain.Data
                     b.Property(e => e.Genre);
                     b.Property(e => e.Year);
                     b.HasIndex(e => e.Title).IsUnique();
+                    b.Property(p => p.TimeStamp).IsRowVersion();
                 });
         }
 
