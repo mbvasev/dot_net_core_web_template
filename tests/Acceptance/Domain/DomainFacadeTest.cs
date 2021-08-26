@@ -13,6 +13,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Test.Shared;
 using Test.Shared.Helpers;
+using Movies.Domain.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Test.Acceptance.Domain.ServiceLocators
 {
@@ -24,8 +26,10 @@ namespace Test.Acceptance.Domain.ServiceLocators
 
         public DomainFacadeTests()
         {
+
             dbConnectionString = new ServiceLocatorForAcceptanceTesting(null).CreateConfigurationProvider().GetDbConnectionString();
             moviesInDb = MovieTestDataGenerator.GetAllMovies(dbConnectionString).GetAwaiter().GetResult();
+            
         }
 
         private (DomainFacade domainFacade, Mediator testMediator) CreateDomainFacade()
@@ -33,6 +37,30 @@ namespace Test.Acceptance.Domain.ServiceLocators
             var testMediator = new Mediator();
             var serviceLocatorForAcceptanceTesting = new ServiceLocatorForAcceptanceTesting(testMediator);
             return (new DomainFacade(serviceLocatorForAcceptanceTesting), testMediator);
+        }
+
+        [AssemblyInitialize]
+        public static void AssemblyInit(TestContext context)
+        {
+            var dbConnectionString = new ServiceLocatorForAcceptanceTesting(null).CreateConfigurationProvider().GetDbConnectionString();
+            using (var dbConext = new MoviesDbContext(dbConnectionString))
+            {
+                dbConext.Database.EnsureDeleted();
+                dbConext.Database.Migrate();
+            }
+        }
+
+        [ClassInitialize]
+        public static void Setup(TestContext context)
+        {
+            var dbConnectionString = new ServiceLocatorForAcceptanceTesting(null).CreateConfigurationProvider().GetDbConnectionString();
+            using (var dbConext = new MoviesDbContext(dbConnectionString))
+            {
+                 var movies = RandomMovieGenerator.GenerateRandomMovies(5);
+                dbConext.Movies.AddRange(movies);
+                dbConext.SaveChanges();
+                
+            }
         }
 
         [TestMethod]
