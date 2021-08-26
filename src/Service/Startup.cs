@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using Movies.Service.Middleware;
 using System.Diagnostics.CodeAnalysis;
 using Movies.Domain.Data;
@@ -25,6 +26,11 @@ namespace Movies.Service
             services.AddRazorPages();
             services.AddSingleton<DomainFacade>();
             services.AddDbContext<MoviesDbContext>();
+            services.AddMvc();
+            services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Movies API", Version = "v1" });
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +49,11 @@ namespace Movies.Service
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+                {
+                c.SwaggerEndpoint("v1/swagger.json", "Movies API V1");
+                });
 
             app.UseEndpoints(endpoints =>
             {
